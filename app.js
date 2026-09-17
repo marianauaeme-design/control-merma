@@ -1,19 +1,16 @@
 let chartProdInstance = null;
 let chartPersInstance = null;
 
-// Establecer fecha actual por defecto
 document.addEventListener("DOMContentLoaded", () => {
   const hoy = new Date().toISOString().split('T')[0];
   if (document.getElementById('m-fecha')) document.getElementById('m-fecha').value = hoy;
   if (document.getElementById('mg-fecha')) document.getElementById('mg-fecha').value = hoy;
 
-  // Registrar Service Worker para PWA Offline
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
   }
 });
 
-// Cambiar de Pestaña
 function cambiarTab(tabId) {
   ['tab-montacargas', 'tab-maniobras', 'tab-dashboard'].forEach(id => {
     document.getElementById(id).classList.add('hidden');
@@ -33,11 +30,13 @@ function cambiarTab(tabId) {
   if (tabId === 'tab-dashboard') actualizardashboard();
 }
 
-// Guardar Registro en LocalStorage (Offline)
 function guardarRegistro(event, tipo) {
   event.preventDefault();
   const esMC = tipo === 'Montacargas';
   const pfx = esMC ? 'm-' : 'mg-';
+
+  const cantidad = parseInt(document.getElementById(pfx + 'cantidad').value) || 0;
+  const tipoUnidad = document.getElementById(pfx + 'tipo-unidad').value;
 
   const registro = {
     id: Date.now(),
@@ -46,7 +45,8 @@ function guardarRegistro(event, tipo) {
     turno: document.getElementById(pfx + 'turno').value,
     nombre: document.getElementById(pfx + 'nombre').value,
     clave: document.getElementById(pfx + 'clave').value,
-    cajas: parseInt(document.getElementById(pfx + 'cajas').value) || 0,
+    cajas: cantidad,
+    unidad: tipoUnidad,
     producto: document.getElementById(pfx + 'producto').value,
     presentacion: document.getElementById(pfx + 'presentacion').value,
     causa: document.querySelector(`input[name="${pfx}causa"]:checked`)?.value || 'N/A',
@@ -60,36 +60,30 @@ function guardarRegistro(event, tipo) {
   alert('¡Reporte guardado exitosamente!');
   event.target.reset();
   
-  // Reestablecer fecha
   document.getElementById(pfx + 'fecha').value = new Date().toISOString().split('T')[0];
 }
 
-// Actualizar Estadísticas, Tabla y Gráficas
 function actualizardashboard() {
   const registros = JSON.parse(localStorage.getItem('merma_registros') || '[]');
   
-  // Totales
-  let totalCajas = 0, incMC = 0, incMG = 0;
+  let totalCantidad = 0, incMC = 0, incMG = 0;
   const prodMap = {};
   const persMap = {};
 
   registros.forEach(r => {
-    totalCajas += r.cajas;
+    totalCantidad += r.cajas;
     if (r.tipo === 'Montacargas') incMC++;
     else incMG++;
 
-    // Agrupación por producto
     prodMap[r.producto] = (prodMap[r.producto] || 0) + r.cajas;
-    // Agrupación por personal
     const keyPers = `${r.nombre} (${r.clave})`;
     persMap[keyPers] = (persMap[keyPers] || 0) + r.cajas;
   });
 
-  document.getElementById('stat-total-cajas').innerText = totalCajas;
+  document.getElementById('stat-total-cajas').innerText = totalCantidad;
   document.getElementById('stat-incidencias-mc').innerText = incMC;
   document.getElementById('stat-incidencias-mg').innerText = incMG;
 
-  // Render Cargar Tabla
   const tbody = document.getElementById('tabla-registros');
   tbody.innerHTML = '';
   [...registros].reverse().forEach(r => {
@@ -100,12 +94,12 @@ function actualizardashboard() {
         <td class="p-2 border">${r.nombre} <span class="text-xs text-gray-500">(${r.clave})</span></td>
         <td class="p-2 border">${r.producto}</td>
         <td class="p-2 border font-bold text-red-600">${r.cajas}</td>
+        <td class="p-2 border text-xs font-semibold text-gray-600">${r.unidad || 'Caja'}</td>
         <td class="p-2 border">${r.causa}</td>
       </tr>
     `;
   });
 
-  // Render Gráficas
   renderGraficas(prodMap, persMap);
 }
 
@@ -120,7 +114,7 @@ function renderGraficas(prodMap, persMap) {
     type: 'bar',
     data: {
       labels: Object.keys(prodMap),
-      datasets: [{ label: 'Cajas Mermadas', data: Object.values(prodMap), backgroundColor: '#b91c1c' }]
+      datasets: [{ label: 'Cantidad Mermada', data: Object.values(prodMap), backgroundColor: '#b91c1c' }]
     },
     options: { responsive: true, plugins: { legend: { display: false } } }
   });
@@ -129,20 +123,19 @@ function renderGraficas(prodMap, persMap) {
     type: 'bar',
     data: {
       labels: Object.keys(persMap),
-      datasets: [{ label: 'Cajas Mermadas', data: Object.values(persMap), backgroundColor: '#1e40af' }]
+      datasets: [{ label: 'Cantidad Mermada', data: Object.values(persMap), backgroundColor: '#1e40af' }]
     },
     options: { responsive: true, plugins: { legend: { display: false } } }
   });
 }
 
-// Exportar a Excel (CSV)
 function exportarCSV() {
   const registros = JSON.parse(localStorage.getItem('merma_registros') || '[]');
   if (!registros.length) return alert('No hay registros guardados para exportar.');
 
-  let csv = 'Fecha,Tipo,Nombre,Clave,Turno,Producto,Presentación,Cajas,Causa,Descripción\n';
+  let csv = 'Fecha,Tipo,Nombre,Clave,Turno,Producto,Presentación,Cantidad,Unidad,Causa,Descripción\n';
   registros.forEach(r => {
-    csv += `"${r.fecha}","${r.tipo}","${r.nombre}","${r.clave}","${r.turno}","${r.producto}","${r.presentacion}","${r.cajas}","${r.causa}","${r.descripcion}"\n`;
+    csv += `"${r.fecha}","${r.tipo}","${r.nombre}","${r.clave}","${r.turno}","${r.producto}","${r.presentacion}","${r.cajas}","${r.unidad || 'Caja'}","${r.causa}","${r.descripcion}"\n`;
   });
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -154,7 +147,6 @@ function exportarCSV() {
   document.body.removeChild(link);
 }
 
-// Limpiar Almacenamiento
 function limpiarDatos() {
   if (confirm('¿Estás seguro de que deseas eliminar TODOS los registros locales de este dispositivo?')) {
     localStorage.removeItem('merma_registros');
