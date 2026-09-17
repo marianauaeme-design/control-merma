@@ -1,8 +1,6 @@
-// Globales para Chart.js
 let chartProdInstance = null;
 let chartPersInstance = null;
 
-// Base de datos de catálogo predeterminada
 const CATALOGO_INICIAL = {
   "100206": "12Sidral + 6Fresca + 6Fanta BU 500 ML VR",
   "100308": "Mzc BU 500ml VR 12Sid,6VF,6Fresca-24pk",
@@ -16,7 +14,6 @@ const CATALOGO_INICIAL = {
   "356":    "COCA COLA 0.5 LT VIDRIO R 24 G"
 };
 
-// Carga inicial segura del catálogo
 function obtenerCatalogo() {
   const guardado = localStorage.getItem('catalogoSKU');
   if (!guardado) {
@@ -40,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
   actualizarDatalist();
 });
 
-// Control de Pestañas
 function cambiarTab(tabId) {
   const pestañas = ['tab-montacargas', 'tab-maniobras', 'tab-catalogo', 'tab-dashboard'];
   const botones = ['btn-montacargas', 'btn-maniobras', 'btn-catalogo', 'btn-dashboard'];
@@ -71,7 +67,6 @@ function cambiarTab(tabId) {
   if (tabId === 'tab-catalogo') renderizarTablaCatalogo();
 }
 
-// Autocompletado de Producto en Capturas
 function autocompletarSKU(prefix) {
   const inputSku = document.getElementById(`${prefix}-producto`).value.trim();
   const inputDesc = document.getElementById(`${prefix}-presentacion`);
@@ -96,9 +91,8 @@ function actualizarDatalist() {
   });
 }
 
-// Guardar nuevo SKU en Catálogo (Fix para persistencia)
 function guardarSKUCatalogo(event) {
-  if (event) event.preventDefault(); // Evita recarga si está dentro de un form
+  if (event) event.preventDefault();
 
   const skuInput = document.getElementById('cat-sku');
   const descInput = document.getElementById('cat-desc');
@@ -111,20 +105,14 @@ function guardarSKUCatalogo(event) {
     return;
   }
 
-  // 1. Obtener datos frescos de localStorage
   CATALOGO = obtenerCatalogo();
-
-  // 2. Insertar o reemplazar
   CATALOGO[sku] = desc;
 
-  // 3. Guardar en localStorage
   localStorage.setItem('catalogoSKU', JSON.stringify(CATALOGO));
 
-  // 4. Limpiar campos
   skuInput.value = '';
   descInput.value = '';
 
-  // 5. Actualizar interfaz
   renderizarTablaCatalogo();
   actualizarDatalist();
 
@@ -146,7 +134,6 @@ function editarSKUCatalogo(sku) {
   document.getElementById('cat-desc').value = CATALOGO[sku];
 }
 
-// Mostrar tabla SOLO en la vista de Catálogo
 function renderizarTablaCatalogo() {
   const tbody = document.getElementById('tabla-catalogo-cuerpo');
   if (!tbody) return;
@@ -179,7 +166,6 @@ function renderizarTablaCatalogo() {
   });
 }
 
-// Guardar Registro de Incidencias (Montacargas / Maniobras)
 function guardarRegistro(event, tipo) {
   event.preventDefault();
   const esMC = tipo === 'Montacargas';
@@ -213,7 +199,6 @@ function guardarRegistro(event, tipo) {
   document.getElementById(pfx + 'fecha').value = new Date().toISOString().split('T')[0];
 }
 
-// Dashboard
 function actualizardashboard() {
   const registros = JSON.parse(localStorage.getItem('merma_registros') || '[]');
   
