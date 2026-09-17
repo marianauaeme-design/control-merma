@@ -64,10 +64,19 @@
             <label class="block text-sm font-medium">No. de Montacargas:</label>
             <input type="text" id="m-num-montacargas" placeholder="Ej. MC-05" required class="w-full border p-2 rounded mt-1">
           </div>
+          
+          <!-- Cantidad y Tipo de Unidad (Caja / Líquido) - Montacargas -->
           <div>
-            <label class="block text-sm font-medium">No. de Cajas Rotas:</label>
-            <input type="number" min="1" id="m-cajas" required class="w-full border p-2 rounded mt-1">
+            <label class="block text-sm font-medium">Cantidad y Tipo de Merma:</label>
+            <div class="flex gap-2 mt-1">
+              <input type="number" min="1" id="m-cantidad" placeholder="Cant." required class="w-1/3 border p-2 rounded">
+              <select id="m-tipo-unidad" required class="w-2/3 border p-2 rounded">
+                <option value="Caja">Caja(s)</option>
+                <option value="Líquido">Líquido / Botella(s)</option>
+              </select>
+            </div>
           </div>
+
           <div>
             <label class="block text-sm font-medium">Producto / SKU:</label>
             <input type="text" id="m-producto" placeholder="SKU o Nombre del producto" required class="w-full border p-2 rounded mt-1">
@@ -114,7 +123,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium">Nombre del Auxiliar:</label>
+            <label class="block text-sm font-medium">Nombre del MG:</label>
             <input type="text" id="mg-nombre" placeholder="Nombre completo" required class="w-full border p-2 rounded mt-1">
           </div>
           <div>
@@ -125,10 +134,19 @@
             <label class="block text-sm font-medium">Área de Almacén:</label>
             <input type="text" id="mg-area" placeholder="Ej. Picking, Emplayado, Tarimas" required class="w-full border p-2 rounded mt-1">
           </div>
+          
+          <!-- Cantidad y Tipo de Unidad (Caja / Líquido) - Maniobras Generales -->
           <div>
-            <label class="block text-sm font-medium">No. de Cajas / Botellas Rotas:</label>
-            <input type="number" min="1" id="mg-cajas" required class="w-full border p-2 rounded mt-1">
+            <label class="block text-sm font-medium">Cantidad y Tipo de Merma:</label>
+            <div class="flex gap-2 mt-1">
+              <input type="number" min="1" id="mg-cantidad" placeholder="Cant." required class="w-1/3 border p-2 rounded">
+              <select id="mg-tipo-unidad" required class="w-2/3 border p-2 rounded">
+                <option value="Caja">Caja(s)</option>
+                <option value="Líquido">Líquido / Botella(s)</option>
+              </select>
+            </div>
           </div>
+
           <div>
             <label class="block text-sm font-medium">Producto / SKU:</label>
             <input type="text" id="mg-producto" placeholder="SKU o Nombre del producto" required class="w-full border p-2 rounded mt-1">
@@ -166,7 +184,7 @@
       <!-- Resumen General -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-600 text-center">
-          <p class="text-sm text-gray-500 font-semibold">Total Cajas Mermadas</p>
+          <p class="text-sm text-gray-500 font-semibold">Total Merma Registrada</p>
           <p id="stat-total-cajas" class="text-3xl font-extrabold text-red-700 mt-1">0</p>
         </div>
         <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500 text-center">
@@ -182,11 +200,11 @@
       <!-- Gráficas de Analítica -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white p-4 rounded-lg shadow">
-          <h3 class="text-md font-bold mb-3 text-center text-gray-700">Top Productos Más Mermados (Cajas)</h3>
+          <h3 class="text-md font-bold mb-3 text-center text-gray-700">Top Productos Más Mermados</h3>
           <canvas id="chartProductos"></canvas>
         </div>
         <div class="bg-white p-4 rounded-lg shadow">
-          <h3 class="text-md font-bold mb-3 text-center text-gray-700">Incidencias por Persona (Top Cajas Mermadas)</h3>
+          <h3 class="text-md font-bold mb-3 text-center text-gray-700">Incidencias por Persona</h3>
           <canvas id="chartPersonal"></canvas>
         </div>
       </div>
@@ -209,7 +227,8 @@
                 <th class="p-2 border">Tipo</th>
                 <th class="p-2 border">Personal</th>
                 <th class="p-2 border">Producto</th>
-                <th class="p-2 border">Cajas</th>
+                <th class="p-2 border">Cantidad</th>
+                <th class="p-2 border">Unidad</th>
                 <th class="p-2 border">Causa</th>
               </tr>
             </thead>
