@@ -68,7 +68,6 @@
             <input type="text" id="m-num-montacargas" placeholder="Ej. MC-05" required class="w-full border p-2 rounded mt-1">
           </div>
           
-          <!-- Cantidad y Tipo -->
           <div>
             <label class="block text-sm font-medium">Cantidad y Tipo de Merma:</label>
             <div class="flex gap-2 mt-1">
@@ -191,14 +190,14 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label class="block text-xs font-semibold uppercase text-gray-600">SKU ECC:</label>
-              <input type="text" id="cat-sku" placeholder="Ej. 100206" class="w-full border p-2 rounded mt-1">
+              <input type="text" id="cat-sku" placeholder="Ej. 3307" class="w-full border p-2 rounded mt-1">
             </div>
             <div class="md:col-span-2">
               <label class="block text-xs font-semibold uppercase text-gray-600">Descripción Completa del Producto:</label>
-              <input type="text" id="cat-desc" placeholder="Ej. 12Sidral + 6Fresca + 6Fanta BU 500 ML VR" class="w-full border p-2 rounded mt-1">
+              <input type="text" id="cat-desc" placeholder="Ej. CCZ Preciada 2L 4pk" class="w-full border p-2 rounded mt-1">
             </div>
           </div>
-          <button onclick="guardarSKUCatalogo()" class="mt-3 bg-red-700 text-white font-bold px-4 py-2 rounded shadow hover:bg-red-800 transition">Guardar en Catálogo</button>
+          <button type="button" onclick="guardarSKUCatalogo(event)" class="mt-3 bg-red-700 text-white font-bold px-4 py-2 rounded shadow hover:bg-red-800 transition">Guardar en Catálogo</button>
         </div>
 
         <!-- Tabla del Catálogo -->
@@ -223,8 +222,6 @@
 
     <!-- 4. DASHBOARD Y ANALÍTICA -->
     <section id="tab-dashboard" class="hidden space-y-6">
-      
-      <!-- Resumen General -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-600 text-center">
           <p class="text-sm text-gray-500 font-semibold">Total Merma Registrada</p>
@@ -240,7 +237,6 @@
         </div>
       </div>
 
-      <!-- Gráficas de Analítica -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white p-4 rounded-lg shadow">
           <h3 class="text-md font-bold mb-3 text-center text-gray-700">Top Productos Más Mermados</h3>
@@ -252,7 +248,6 @@
         </div>
       </div>
 
-      <!-- Tabla de Registros y Acciones -->
       <div class="bg-white p-6 rounded-lg shadow">
         <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-3 mb-4 gap-2">
           <h2 class="text-lg font-bold text-red-700">Historial de Registros Local</h2>
@@ -275,20 +270,15 @@
                 <th class="p-2 border">Causa</th>
               </tr>
             </thead>
-            <tbody id="tabla-registros">
-              <!-- Se puebla dinámicamente -->
-            </tbody>
+            <tbody id="tabla-registros"></tbody>
           </table>
         </div>
       </div>
-
     </section>
 
   </main>
 
-  <!-- Datalist dinámico para autocompletado global -->
   <datalist id="lista-skus"></datalist>
-
   <script src="app.js"></script>
 </body>
 </html>
