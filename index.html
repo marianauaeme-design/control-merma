@@ -20,15 +20,18 @@
   </header>
 
   <!-- Pestañas de Navegación -->
-  <nav class="flex justify-center bg-white border-b shadow-sm sticky top-0 z-10">
-    <button onclick="cambiarTab('tab-montacargas')" id="btn-montacargas" class="flex-1 py-3 text-center font-semibold text-red-700 border-b-2 border-red-700 focus:outline-none">
+  <nav class="flex flex-wrap justify-center bg-white border-b shadow-sm sticky top-0 z-10">
+    <button onclick="cambiarTab('tab-montacargas')" id="btn-montacargas" class="flex-1 min-w-[120px] py-3 text-center font-semibold text-red-700 border-b-2 border-red-700 focus:outline-none">
       🚜 Montacarguistas
     </button>
-    <button onclick="cambiarTab('tab-maniobras')" id="btn-maniobras" class="flex-1 py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent focus:outline-none">
-      📦 Maniobras Generales
+    <button onclick="cambiarTab('tab-maniobras')" id="btn-maniobras" class="flex-1 min-w-[120px] py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent focus:outline-none">
+      📦 Maniobras
     </button>
-    <button onclick="cambiarTab('tab-dashboard')" id="btn-dashboard" class="flex-1 py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent focus:outline-none">
-      📊 Dashboard / Analítica
+    <button onclick="cambiarTab('tab-catalogo')" id="btn-catalogo" class="flex-1 min-w-[120px] py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent focus:outline-none">
+      🗂️ Catálogo SKUs
+    </button>
+    <button onclick="cambiarTab('tab-dashboard')" id="btn-dashboard" class="flex-1 min-w-[120px] py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent focus:outline-none">
+      📊 Dashboard
     </button>
   </nav>
 
@@ -65,7 +68,7 @@
             <input type="text" id="m-num-montacargas" placeholder="Ej. MC-05" required class="w-full border p-2 rounded mt-1">
           </div>
           
-          <!-- Cantidad y Tipo de Unidad (Caja / Líquido) - Montacargas -->
+          <!-- Cantidad y Tipo -->
           <div>
             <label class="block text-sm font-medium">Cantidad y Tipo de Merma:</label>
             <div class="flex gap-2 mt-1">
@@ -78,12 +81,12 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium">Producto / SKU:</label>
-            <input type="text" id="m-producto" placeholder="SKU o Nombre del producto" required class="w-full border p-2 rounded mt-1">
+            <label class="block text-sm font-medium">Producto / SKU ECC:</label>
+            <input type="text" id="m-producto" list="lista-skus" placeholder="Ingrese SKU o nombre" oninput="autocompletarSKU('m')" required class="w-full border p-2 rounded mt-1">
           </div>
           <div>
-            <label class="block text-sm font-medium">Presentación / Envase:</label>
-            <input type="text" id="m-presentacion" placeholder="Ej. Vidrio 355ml / PET 600ml" class="w-full border p-2 rounded mt-1">
+            <label class="block text-sm font-medium">Presentación / Descripción:</label>
+            <input type="text" id="m-presentacion" placeholder="Se llena automáticamente..." class="w-full border p-2 rounded mt-1 bg-gray-50">
           </div>
           <div class="md:col-span-2">
             <label class="block text-sm font-medium">Causa del Evento:</label>
@@ -135,7 +138,6 @@
             <input type="text" id="mg-area" placeholder="Ej. Picking, Emplayado, Tarimas" required class="w-full border p-2 rounded mt-1">
           </div>
           
-          <!-- Cantidad y Tipo de Unidad (Caja / Líquido) - Maniobras Generales -->
           <div>
             <label class="block text-sm font-medium">Cantidad y Tipo de Merma:</label>
             <div class="flex gap-2 mt-1">
@@ -148,12 +150,12 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium">Producto / SKU:</label>
-            <input type="text" id="mg-producto" placeholder="SKU o Nombre del producto" required class="w-full border p-2 rounded mt-1">
+            <label class="block text-sm font-medium">Producto / SKU ECC:</label>
+            <input type="text" id="mg-producto" list="lista-skus" placeholder="Ingrese SKU o nombre" oninput="autocompletarSKU('mg')" required class="w-full border p-2 rounded mt-1">
           </div>
           <div>
-            <label class="block text-sm font-medium">Presentación / Envase:</label>
-            <input type="text" id="mg-presentacion" placeholder="Ej. Lata 355ml / Botella 2.5L" class="w-full border p-2 rounded mt-1">
+            <label class="block text-sm font-medium">Presentación / Descripción:</label>
+            <input type="text" id="mg-presentacion" placeholder="Se llena automáticamente..." class="w-full border p-2 rounded mt-1 bg-gray-50">
           </div>
           <div class="md:col-span-2">
             <label class="block text-sm font-medium">Causa del Evento:</label>
@@ -178,7 +180,48 @@
       </form>
     </section>
 
-    <!-- 3. DASHBOARD Y ANALÍTICA -->
+    <!-- 3. GESTIÓN Y CATÁLOGO DE SKUS -->
+    <section id="tab-catalogo" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-lg font-bold mb-4 text-red-700 border-b pb-2">Administrador de Catálogo SKU</h2>
+        
+        <!-- Formulario Alta/Edición SKU -->
+        <div class="bg-gray-50 p-4 rounded-lg border mb-6">
+          <h3 class="font-bold text-gray-700 mb-3">➕ Añadir o Modificar SKU</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600">SKU ECC:</label>
+              <input type="text" id="cat-sku" placeholder="Ej. 100206" class="w-full border p-2 rounded mt-1">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold uppercase text-gray-600">Descripción Completa del Producto:</label>
+              <input type="text" id="cat-desc" placeholder="Ej. 12Sidral + 6Fresca + 6Fanta BU 500 ML VR" class="w-full border p-2 rounded mt-1">
+            </div>
+          </div>
+          <button onclick="guardarSKUCatalogo()" class="mt-3 bg-red-700 text-white font-bold px-4 py-2 rounded shadow hover:bg-red-800 transition">Guardar en Catálogo</button>
+        </div>
+
+        <!-- Tabla del Catálogo -->
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-gray-700">Catálogo Registrado (<span id="total-skus-cat">0</span>)</h3>
+          <input type="text" id="filtro-catalogo" oninput="renderizarTablaCatalogo()" placeholder="🔍 Buscar en catálogo..." class="border p-2 rounded text-sm w-1/2 md:w-1/3">
+        </div>
+        <div class="overflow-x-auto max-h-96">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead class="sticky top-0 bg-gray-100">
+              <tr class="text-gray-700 border-b">
+                <th class="p-2 border">SKU ECC</th>
+                <th class="p-2 border">Descripción</th>
+                <th class="p-2 border text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-catalogo-cuerpo"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DASHBOARD Y ANALÍTICA -->
     <section id="tab-dashboard" class="hidden space-y-6">
       
       <!-- Resumen General -->
@@ -242,6 +285,9 @@
     </section>
 
   </main>
+
+  <!-- Datalist dinámico para autocompletado global -->
+  <datalist id="lista-skus"></datalist>
 
   <script src="app.js"></script>
 </body>
