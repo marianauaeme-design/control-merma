@@ -1,0 +1,9 @@
+{
+  "short_name": "Merma App",
+  "name": "Control de Merma y Roturas - FEMSA",
+  "icons": [],
+  "start_url": "./index.html",
+  "background_color": "#ffffff",
+  "theme_color": "#b91c1c",
+  "display": "standalone"
+}

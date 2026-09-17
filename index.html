@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Merma - Operaciones FEMSA</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js para gráficas en el Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#b91c1c">
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800 flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-red-700 text-white p-4 shadow-md text-center">
+    <h1 class="text-xl font-bold uppercase tracking-wider">Control de Merma y Roturas</h1>
+    <p class="text-xs text-red-200">Sistema Operativo Offline - MN-A-20-08-FR-02</p>
+  </header>
+
+  <!-- Pestañas de Navegación -->
+  <nav class="flex justify-center bg-white border-b shadow-sm sticky top-0 z-10">
+    <button onclick="cambiarTab('tab-montacargas')" id="btn-montacargas" class="flex-1 py-3 text-center font-semibold text-red-700 border-b-2 border-red-700 focus:outline-none">
+      🚜 Montacarguistas
+    </button>
+    <button onclick="cambiarTab('tab-maniobras')" id="btn-maniobras" class="flex-1 py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent focus:outline-none">
+      📦 Maniobras Generales
+    </button>
+    <button onclick="cambiarTab('tab-dashboard')" id="btn-dashboard" class="flex-1 py-3 text-center font-semibold text-gray-500 border-b-2 border-transparent focus:outline-none">
+      📊 Dashboard / Analítica
+    </button>
+  </nav>
+
+  <!-- Contenido Principal -->
+  <main class="max-w-4xl mx-auto p-4 flex-grow w-full">
+
+    <!-- 1. CAPTURA MONTACARGUISTAS -->
+    <section id="tab-montacargas" class="block bg-white p-6 rounded-lg shadow">
+      <h2 class="text-lg font-bold mb-4 text-red-700 border-b pb-2">Reporte de Rotura - Montacargas</h2>
+      <form id="form-montacargas" onsubmit="guardarRegistro(event, 'Montacargas')">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium">Fecha:</label>
+            <input type="date" id="m-fecha" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Turno:</label>
+            <select id="m-turno" required class="w-full border p-2 rounded mt-1">
+              <option value="Mañana">Mañana</option>
+              <option value="Tarde">Tarde</option>
+              <option value="Noche">Noche</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Nombre del Operador:</label>
+            <input type="text" id="m-nombre" placeholder="Nombre completo" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Clave / ID Operador:</label>
+            <input type="text" id="m-clave" placeholder="Ej. OP-102" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">No. de Montacargas:</label>
+            <input type="text" id="m-num-montacargas" placeholder="Ej. MC-05" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">No. de Cajas Rotas:</label>
+            <input type="number" min="1" id="m-cajas" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Producto / SKU:</label>
+            <input type="text" id="m-producto" placeholder="SKU o Nombre del producto" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Presentación / Envase:</label>
+            <input type="text" id="m-presentacion" placeholder="Ej. Vidrio 355ml / PET 600ml" class="w-full border p-2 rounded mt-1">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium">Causa del Evento:</label>
+            <div class="flex gap-6 mt-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="m-causa" value="Accidente" checked class="text-red-700 focus:ring-red-500"> Accidente
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="m-causa" value="Negligencia" class="text-red-700 focus:ring-red-500"> Negligencia
+              </label>
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium">Descripción Detallada:</label>
+            <textarea id="m-descripcion" rows="3" class="w-full border p-2 rounded mt-1" placeholder="Detalles de la maniobra u ocurrencia..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="mt-6 w-full bg-red-700 text-white font-bold py-3 rounded-lg shadow hover:bg-red-800 transition">Guardar Reporte</button>
+      </form>
+    </section>
+
+    <!-- 2. CAPTURA MANIOBRAS GENERALES -->
+    <section id="tab-maniobras" class="hidden bg-white p-6 rounded-lg shadow">
+      <h2 class="text-lg font-bold mb-4 text-red-700 border-b pb-2">Reporte de Rotura - Maniobras Generales</h2>
+      <form id="form-maniobras" onsubmit="guardarRegistro(event, 'Maniobras Generales')">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium">Fecha:</label>
+            <input type="date" id="mg-fecha" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Turno:</label>
+            <select id="mg-turno" required class="w-full border p-2 rounded mt-1">
+              <option value="Mañana">Mañana</option>
+              <option value="Tarde">Tarde</option>
+              <option value="Noche">Noche</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Nombre del Auxiliar:</label>
+            <input type="text" id="mg-nombre" placeholder="Nombre completo" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Clave / ID Personal:</label>
+            <input type="text" id="mg-clave" placeholder="Ej. MG-204" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Área de Almacén:</label>
+            <input type="text" id="mg-area" placeholder="Ej. Picking, Emplayado, Tarimas" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">No. de Cajas / Botellas Rotas:</label>
+            <input type="number" min="1" id="mg-cajas" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Producto / SKU:</label>
+            <input type="text" id="mg-producto" placeholder="SKU o Nombre del producto" required class="w-full border p-2 rounded mt-1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Presentación / Envase:</label>
+            <input type="text" id="mg-presentacion" placeholder="Ej. Lata 355ml / Botella 2.5L" class="w-full border p-2 rounded mt-1">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium">Causa del Evento:</label>
+            <div class="flex flex-wrap gap-4 mt-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="mg-causa" value="Caída en Estibado" checked class="text-red-700 focus:ring-red-500"> Caída en Estibado
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="mg-causa" value="Mal Manejo Manual" class="text-red-700 focus:ring-red-500"> Mal Manejo Manual
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="mg-causa" value="Empaque Defectuoso" class="text-red-700 focus:ring-red-500"> Empaque Defectuoso
+              </label>
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium">Descripción Detallada:</label>
+            <textarea id="mg-descripcion" rows="3" class="w-full border p-2 rounded mt-1" placeholder="Detalles del suceso..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="mt-6 w-full bg-red-700 text-white font-bold py-3 rounded-lg shadow hover:bg-red-800 transition">Guardar Reporte</button>
+      </form>
+    </section>
+
+    <!-- 3. DASHBOARD Y ANALÍTICA -->
+    <section id="tab-dashboard" class="hidden space-y-6">
+      
+      <!-- Resumen General -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-600 text-center">
+          <p class="text-sm text-gray-500 font-semibold">Total Cajas Mermadas</p>
+          <p id="stat-total-cajas" class="text-3xl font-extrabold text-red-700 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500 text-center">
+          <p class="text-sm text-gray-500 font-semibold">Incidencias Montacargas</p>
+          <p id="stat-incidencias-mc" class="text-3xl font-extrabold text-gray-800 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500 text-center">
+          <p class="text-sm text-gray-500 font-semibold">Incidencias Maniobras</p>
+          <p id="stat-incidencias-mg" class="text-3xl font-extrabold text-gray-800 mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Gráficas de Analítica -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="text-md font-bold mb-3 text-center text-gray-700">Top Productos Más Mermados (Cajas)</h3>
+          <canvas id="chartProductos"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="text-md font-bold mb-3 text-center text-gray-700">Incidencias por Persona (Top Cajas Mermadas)</h3>
+          <canvas id="chartPersonal"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabla de Registros y Acciones -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-3 mb-4 gap-2">
+          <h2 class="text-lg font-bold text-red-700">Historial de Registros Local</h2>
+          <div class="flex gap-2">
+            <button onclick="exportarCSV()" class="bg-green-700 text-white text-sm px-4 py-2 rounded shadow hover:bg-green-800 transition">📥 Exportar CSV (Excel)</button>
+            <button onclick="limpiarDatos()" class="bg-gray-200 text-red-600 text-sm px-3 py-2 rounded hover:bg-red-100 transition">🗑️ Borrar Todo</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-gray-100 text-gray-700 border-b">
+                <th class="p-2 border">Fecha</th>
+                <th class="p-2 border">Tipo</th>
+                <th class="p-2 border">Personal</th>
+                <th class="p-2 border">Producto</th>
+                <th class="p-2 border">Cajas</th>
+                <th class="p-2 border">Causa</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-registros">
+              <!-- Se puebla dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
