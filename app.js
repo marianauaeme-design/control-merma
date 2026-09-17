@@ -1,5 +1,26 @@
+// Globales para Chart.js
 let chartProdInstance = null;
 let chartPersInstance = null;
+
+// Base de datos de catálogo predeterminada
+const CATALOGO_INICIAL = {
+  "100206": "12Sidral + 6Fresca + 6Fanta BU 500 ML VR",
+  "100308": "Mzc BU 500ml VR 12Sid,6VF,6Fresca-24pk",
+  "101022": "MZC 18 VMFNGO+6 VF GUYB 350ML VR BU 24P",
+  "101020": "MZC 12 SID+6 VFMNGO+6 DLW 12OZ VR BU24PK",
+  "3201":   "MZC 18 CCO+6CCSA 12OZ VR 24PK",
+  "3281":   "COCA COLA 1.75 ML 8 PK PET-Preciada",
+  "99212":  "MONSTER LO CARB 473ML 4PK",
+  "99365":  "ADES SOYA FRUTAL MANZANA 946 ml 3 G",
+  "84100":  "AGUA CIEL 1.5 LT NR 12 PK",
+  "356":    "COCA COLA 0.5 LT VIDRIO R 24 G"
+};
+
+// Carga de catálogo desde localStorage
+let CATALOGO = JSON.parse(localStorage.getItem('catalogoSKU')) || CATALOGO_INICIAL;
+if (!localStorage.getItem('catalogoSKU')) {
+  localStorage.setItem('catalogoSKU', JSON.stringify(CATALOGO));
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const hoy = new Date().toISOString().split('T')[0];
@@ -9,27 +30,124 @@ document.addEventListener("DOMContentLoaded", () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
   }
+
+  // Inicializar Autocompletado y Tabla de Catálogo
+  actualizarDatalist();
+  renderizarTablaCatalogo();
 });
 
+// Control de Pestañas
 function cambiarTab(tabId) {
-  ['tab-montacargas', 'tab-maniobras', 'tab-dashboard'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
-  document.getElementById(tabId).classList.remove('hidden');
+  const pestañas = ['tab-montacargas', 'tab-maniobras', 'tab-catalogo', 'tab-dashboard'];
+  const botones = ['btn-montacargas', 'btn-maniobras', 'btn-catalogo', 'btn-dashboard'];
 
-  ['btn-montacargas', 'btn-maniobras', 'btn-dashboard'].forEach(btnId => {
+  pestañas.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+
+  const tabActiva = document.getElementById(tabId);
+  if (tabActiva) tabActiva.classList.remove('hidden');
+
+  botones.forEach(btnId => {
     const btn = document.getElementById(btnId);
-    btn.classList.remove('text-red-700', 'border-red-700');
-    btn.classList.add('text-gray-500', 'border-transparent');
+    if (btn) {
+      btn.classList.remove('text-red-700', 'border-red-700');
+      btn.classList.add('text-gray-500', 'border-transparent');
+    }
   });
 
   const activeBtn = document.getElementById('btn-' + tabId.replace('tab-', ''));
-  activeBtn.classList.remove('text-gray-500', 'border-transparent');
-  activeBtn.classList.add('text-red-700', 'border-red-700');
+  if (activeBtn) {
+    activeBtn.classList.remove('text-gray-500', 'border-transparent');
+    activeBtn.classList.add('text-red-700', 'border-red-700');
+  }
 
   if (tabId === 'tab-dashboard') actualizardashboard();
+  if (tabId === 'tab-catalogo') renderizarTablaCatalogo();
 }
 
+// Autocompletado de Producto en Capturas
+function autocompletarSKU(prefix) {
+  const inputSku = document.getElementById(`${prefix}-producto`).value.trim();
+  const inputDesc = document.getElementById(`${prefix}-presentacion`);
+  if (CATALOGO[inputSku]) {
+    inputDesc.value = CATALOGO[inputSku];
+  }
+}
+
+function actualizarDatalist() {
+  const datalist = document.getElementById('lista-skus');
+  if (!datalist) return;
+  datalist.innerHTML = '';
+  Object.keys(CATALOGO).forEach(sku => {
+    const opt = document.createElement('option');
+    opt.value = sku;
+    opt.label = CATALOGO[sku];
+    datalist.appendChild(opt);
+  });
+}
+
+// Operaciones del Catálogo
+function guardarSKUCatalogo() {
+  const sku = document.getElementById('cat-sku').value.trim();
+  const desc = document.getElementById('cat-desc').value.trim();
+  if (!sku || !desc) return alert("Por favor ingresa tanto el SKU como su descripción.");
+
+  CATALOGO[sku] = desc;
+  localStorage.setItem('catalogoSKU', JSON.stringify(CATALOGO));
+
+  document.getElementById('cat-sku').value = '';
+  document.getElementById('cat-desc').value = '';
+
+  renderizarTablaCatalogo();
+  actualizarDatalist();
+}
+
+function borrarSKUCatalogo(sku) {
+  if (confirm(`¿Deseas eliminar el SKU ${sku} del catálogo?`)) {
+    delete CATALOGO[sku];
+    localStorage.setItem('catalogoSKU', JSON.stringify(CATALOGO));
+    renderizarTablaCatalogo();
+    actualizarDatalist();
+  }
+}
+
+function editarSKUCatalogo(sku) {
+  document.getElementById('cat-sku').value = sku;
+  document.getElementById('cat-desc').value = CATALOGO[sku];
+}
+
+function renderizarTablaCatalogo() {
+  const tbody = document.getElementById('tabla-catalogo-cuerpo');
+  if (!tbody) return;
+
+  const filtro = (document.getElementById('filtro-catalogo')?.value || '').toLowerCase();
+  tbody.innerHTML = '';
+
+  const skus = Object.keys(CATALOGO).filter(k => 
+    k.toLowerCase().includes(filtro) || CATALOGO[k].toLowerCase().includes(filtro)
+  );
+
+  const spanTotal = document.getElementById('total-skus-cat');
+  if (spanTotal) spanTotal.innerText = skus.length;
+
+  skus.forEach(sku => {
+    const tr = document.createElement('tr');
+    tr.className = "border-b hover:bg-gray-50";
+    tr.innerHTML = `
+      <td class="p-2 border font-mono font-bold text-gray-800">${sku}</td>
+      <td class="p-2 border text-gray-700">${CATALOGO[sku]}</td>
+      <td class="p-2 border text-center">
+        <button onclick="editarSKUCatalogo('${sku}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs mr-1 hover:bg-blue-700 transition">Editar</button>
+        <button onclick="borrarSKUCatalogo('${sku}')" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 transition">Borrar</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Guardar Registro de Incidencias
 function guardarRegistro(event, tipo) {
   event.preventDefault();
   const esMC = tipo === 'Montacargas';
@@ -63,6 +181,7 @@ function guardarRegistro(event, tipo) {
   document.getElementById(pfx + 'fecha').value = new Date().toISOString().split('T')[0];
 }
 
+// Analítica y Dashboard
 function actualizardashboard() {
   const registros = JSON.parse(localStorage.getItem('merma_registros') || '[]');
   
@@ -129,6 +248,7 @@ function renderGraficas(prodMap, persMap) {
   });
 }
 
+// Exportación y Mantenimiento Local
 function exportarCSV() {
   const registros = JSON.parse(localStorage.getItem('merma_registros') || '[]');
   if (!registros.length) return alert('No hay registros guardados para exportar.');
